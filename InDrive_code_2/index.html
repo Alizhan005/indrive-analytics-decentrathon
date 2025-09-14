@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>inDrive - Астана</title>
+    
+    <!-- LEAFLET КАРТА - ПРАВИЛЬНАЯ ЗАГРУЗКА - ОБЯЗАТЕЛЬНО ДО ВСЕХ СКРИПТОВ -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Clean Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-text">in<span class="logo-accent">Drive</span></span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="driver-status" id="driverStatus">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span class="status-text" id="statusText">Офлайн</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="balance" id="balance">49,700₸</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- MAP SCREEN - ПРАВИЛЬНАЯ СТРУКТУРА -->
+            <section id="mapScreen" class="screen active map-screen">
+                <div class="map-container">
+                    <div id="map" class="leaflet-map"></div>
+                    
+                    <!-- Map Controls -->
+                    <div class="map-controls">
+                        <button class="map-control-btn" id="myLocationBtn">
+                            📍
+                        </button>
+                        <button class="map-control-btn" id="layersBtn">
+                            🗺️
+                        </button>
+                        <button class="map-control-btn" id="trafficBtn">
+                            🚦
+                        </button>
+                    </div>
+
+                    <!-- Zone Filter -->
+                    <div class="zone-filter">
+                        <button class="filter-btn active" data-filter="all">
+                            <span>Все зоны</span>
+                        </button>
+                        <button class="filter-btn" data-filter="high">
+                            <span>Горячие</span>
+                        </button>
+                        <button class="filter-btn" data-filter="traffic">
+                            <span>Быстрые</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Go Online Button -->
+                <div class="fab-container">
+                    <button class="fab-main" id="goOnlineBtn">
+                        <span class="fab-icon">🚗</span>
+                        <span class="fab-text">Выйти в сеть</span>
+                    </button>
+                </div>
+
+                <!-- Order Cards Container -->
+                <div class="order-cards-container" id="orderCardsContainer">
+                    <!-- Order cards will be inserted here -->
+                </div>
+
+                <!-- Driver Stats -->
+                <div class="driver-stats card" id="driverStats">
+                    <div class="stats-item">
+                        <div class="stat-value">4.8</div>
+                        <div class="stat-label">Рейтинг</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stat-value">2,847</div>
+                        <div class="stat-label">Поездок</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stat-value">19.8k</div>
+                        <div class="stat-label">Сегодня</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Screen -->
+            <section id="ordersScreen" class="screen">
+                <div class="screen-header">
+                    <h2>История поездок</h2>
+                    <div class="filter-tabs">
+                        <button class="tab-btn active" data-period="today">Сегодня</button>
+                        <button class="tab-btn" data-period="week">Неделя</button>
+                        <button class="tab-btn" data-period="month">Месяц</button>
+                    </div>
+                </div>
+                
+                <div class="orders-stats">
+                    <div class="stat-card card">
+                        <div class="stat-icon">🚗</div>
+                        <div class="stat-value">11</div>
+                        <div class="stat-label">Поездок</div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-value">7.2ч</div>
+                        <div class="stat-label">В сети</div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-value">4.9</div>
+                        <div class="stat-label">Рейтинг</div>
+                    </div>
+                </div>
+
+                <div class="orders-list" id="ordersList">
+                    <!-- Orders will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Earnings Screen -->
+            <section id="earningsScreen" class="screen">
+                <div class="screen-header">
+                    <h2>Доходы</h2>
+                </div>
+                
+                <div class="earnings-summary card">
+                    <div class="earnings-main">
+                        <div class="earnings-amount">19,850₸</div>
+                        <div class="earnings-label">Заработано сегодня</div>
+                        <div class="earnings-change positive">
+                            <span>📈</span>
+                            +15% к вчера
+                        </div>
+                    </div>
+                    
+                    <div class="goal-progress">
+                        <div class="goal-info">
+                            <span>До цели: 25,000₸</span>
+                            <span class="goal-percentage">79%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 79%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container card" style="position: relative; height: 240px;">
+                    <canvas id="earningsChart"></canvas>
+                </div>
+
+                <div class="weekly-stats card">
+                    <h3>Статистика недели</h3>
+                    <div class="week-grid">
+                        <div class="week-item">
+                            <div class="week-day">Пн</div>
+                            <div class="week-amount">18,350₸</div>
+                        </div>
+                        <div class="week-item">
+                            <div class="week-day">Вт</div>
+                            <div class="week-amount">22,180₸</div>
+                        </div>
+                        <div class="week-item">
+                            <div class="week-day">Ср</div>
+                            <div class="week-amount">19,640₸</div>
+                        </div>
+                        <div class="week-item">
+                            <div class="week-day">Чт</div>
+                            <div class="week-amount">26,420₸</div>
+                        </div>
+                        <div class="week-item">
+                            <div class="week-day">Пт</div>
+                            <div class="week-amount">28,950₸</div>
+                        </div>
+                        <div class="week-item">
+                            <div class="week-day">Сб</div>
+                            <div class="week-amount">31,200₸</div>
+                        </div>
+                        <div class="week-item">
+                            <div class="week-day">Вс</div>
+                            <div class="week-amount">19,850₸</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Screen -->
+            <section id="profileScreen" class="screen">
+                <div class="screen-header">
+                    <h2>Профиль</h2>
+                </div>
+                
+                <div class="profile-card card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <span class="avatar-emoji">👨🏻‍💼</span>
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-name">Асет Нурланов</div>
+                            <div class="profile-phone">+7 771 234 56 78</div>
+                            <div class="profile-rating">
+                                <span class="rating-stars">⭐⭐⭐⭐⭐</span>
+                                <span class="rating-value">4.8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="car-info card">
+                    <h3>Мой автомобиль</h3>
+                    <div class="car-details">
+                        <div class="car-main">
+                            <div class="car-icon">🚗</div>
+                            <div class="car-text">
+                                <div class="car-model">Toyota Camry</div>
+                                <div class="car-year">2020 • Белый</div>
+                            </div>
+                        </div>
+                        <div class="car-plate">123ABC04</div>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="profile-btn card">
+                        <span class="btn-icon">📄</span>
+                        <span>Документы</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                    <button class="profile-btn card">
+                        <span class="btn-icon">⚙️</span>
+                        <span>Настройки</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                    <button class="profile-btn card">
+                        <span class="btn-icon">📊</span>
+                        <span>Аналитика</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                    <button class="profile-btn card">
+                        <span class="btn-icon">❓</span>
+                        <span>Поддержка</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-screen="mapScreen">
+                <span class="nav-icon">🗺️</span>
+                <span class="nav-label">Карта</span>
+            </button>
+            <button class="nav-item" data-screen="ordersScreen">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">Заказы</span>
+            </button>
+            <button class="nav-item" data-screen="earningsScreen">
+                <span class="nav-icon">💰</span>
+                <span class="nav-label">Доходы</span>
+            </button>
+            <button class="nav-item" data-screen="profileScreen">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Профиль</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- СКРИПТЫ В ПРАВИЛЬНОМ ПОРЯДКЕ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
